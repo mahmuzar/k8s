@@ -1,0 +1,71 @@
+# REQUIRED: Database
+database:
+  type: postgres
+  url: "jdbc:postgresql://postgres.default.svc.cluster.local:5432/jira"
+  driver: org.postgresql.Driver
+  credentials:
+    secretName: jira-db-secret
+    usernameSecretKey: username
+    passwordSecretKey: password
+
+# REQUIRED: Volumes
+volumes:
+  localHome:
+    persistentVolumeClaim:
+      create: true          # ← ВАЖНО!
+      storageClassName: longhorn
+      resources:
+        requests:
+          storage: 10Gi
+    mountPath: "/var/atlassian/application-data/jira"
+
+  sharedHome:
+    persistentVolumeClaim:
+      create: true          # ← ВАЖНО!
+      storageClassName: longhorn
+      accessModes: ["ReadWriteOnce"]  # для однонодового кластера
+      resources:
+        requests:
+          storage: 20Gi
+    mountPath: "/var/atlassian/application-data/shared-home"
+
+# Опционально: ресурсы
+jira:
+  image:
+    repository: docker.io/atlassian/jira-software
+    tag: 11.2.0-jdk17  # ← Последняя версия без обязательного Data Center
+  # Отключаем Data Center
+  clustering:
+    enabled: false
+  server:
+    enabled: true
+  # Указываем тип установки
+  serviceType: "server"
+
+  # Отключаем ненужные плагины
+  # Отключаем проблемный плагин через переменную окружения
+  additionalEnvironmentVariables:
+    - name: ATL_PLUGIN_SYSTEM_DISABLE_LIST
+      value: com.atlassian.plugins.authentication.atlassian-authentication-plugin
+
+    # Сервис будет слушать на порту 80 (внешний)
+  service:
+    port: 80
+    type: ClusterIP
+
+  # Контейнер Jira слушает на порту 8080 (внутренний)
+  ports:
+    http: 8080
+
+  container:
+    requests:
+      memory: "1Gi"
+      cpu: "500m"
+    limits:
+      memory: "2Gi"
+      cpu: "1"
+
+# Базовый URL
+ingress:
+  host: "jira.mahmuzar"
+

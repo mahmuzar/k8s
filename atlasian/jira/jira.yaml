@@ -1,0 +1,98 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: jira
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: jira-db-secret
+  namespace: jira
+type: Opaque
+data:
+  username: amlyYQ==   # echo -n "jira" | base64
+  password: amlyYQ==   # echo -n "jira" | base64
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jira
+  namespace: jira
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jira
+  template:
+    metadata:
+      labels:
+        app: jira
+    spec:
+      securityContext:
+        fsGroup: 2001
+      containers:
+      - name: jira
+        image: docker.io/atlassian/jira-core:8.13.20  # ← КЛЮЧЕВОЙ МОМЕНТ
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - name: jira-home
+          mountPath: /var/atlassian/application-data/jira
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1"
+      volumes:
+      - name: jira-home
+        persistentVolumeClaim:
+          claimName: jira-home-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: jira-home-pvc
+  namespace: jira
+spec:
+  accessModes: ["ReadWriteOnce"]
+  storageClassName: longhorn
+  resources:
+    requests:
+      storage: 30Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jira
+  namespace: jira
+spec:
+  selector:
+    app: jira
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: jira
+  namespace: jira
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: jira.mahmuzar
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: jira
+            port:
+              number: 80
