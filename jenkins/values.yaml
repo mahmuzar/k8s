@@ -1,0 +1,43 @@
+# values.yaml
+controller:
+  admin:
+    username: "admin"
+    password: "admin123"
+  
+  # Отключаем установку плагинов
+  installPlugins: []
+  
+  # Отключаем мастера настройки
+  javaOpts: >-
+    -Djenkins.install.runSetupWizard=false
+  
+  podSecurityContext:
+    fsGroup: 1000
+    fsGroupChangePolicy: "OnRootMismatch"
+  
+  containerSecurityContext:
+    runAsUser: 1000
+    runAsGroup: 1000
+    runAsNonRoot: true
+  
+  persistence:
+    enabled: true
+    storageClass: "longhorn"
+    size: "8Gi"
+  
+  ingress:
+    enabled: true
+    ingressClassName: "nginx"
+    hostName: "jenkins.mahmuzar"
+    tls: false
+  
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+    limits:
+      cpu: "2"
+      memory: "2Gi"
+
+agent:
+  enabled: true
