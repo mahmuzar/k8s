@@ -1,0 +1,11 @@
+kubectl create namespace monitoring
+
+helm install prometheus prometheus-community/kube-prometheus-stack \
+  --namespace monitoring \
+  --set prometheus.prometheusSpec.resources.requests.memory="512Mi" \
+  --set prometheus.prometheusSpec.resources.limits.memory="1Gi" \
+  --set grafana.resources.requests.memory="256Mi" \
+  --set grafana.resources.limits.memory="512Mi" \
+  --set alertmanager.enabled=false \
+  --set kubeStateMetrics.enabled=true \
+  --set nodeExporter.enabled=true
