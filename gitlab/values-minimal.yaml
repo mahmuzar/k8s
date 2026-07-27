@@ -1,0 +1,99 @@
+# values-minimal.yaml
+global:
+  hosts:
+    domain: gitlab.mahmuzar
+  storageClass: longhorn
+  # Отключаем всё ненужное для dev
+  edition: ce
+  
+  # Отключаем компоненты, которые не нужны для базового CI/CD
+  kas:
+    enabled: false
+  pages:
+    enabled: false
+  gitlab:
+    monitoring:
+      enabled: false
+
+# Отключаем Runner (настроим отдельно)
+gitlab-runner:
+  install: false
+
+# Минимальные ресурсы
+webservice:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 300m
+      memory: 512Mi
+    limits:
+      cpu: 1
+      memory: 1Gi
+
+sidekiq:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+gitaly:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+postgresql:
+  install: true
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+redis:
+  install: true
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+registry:
+  enabled: true
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+minio:
+  enabled: true
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+# Ingress
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  hosts:
+    host: gitlab.mahmuzar
