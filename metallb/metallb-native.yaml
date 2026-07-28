@@ -1768,6 +1768,13 @@ spec:
         component: speaker
     spec:
       containers:
+        resources:
+          limits:
+            cpu: 100m
+            memory: 100Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
       - args:
         - --port=7472
         - --log-level=info
@@ -1825,6 +1832,7 @@ spec:
           capabilities:
             add:
             - NET_RAW
+            - NET_ADMIN
             drop:
             - ALL
           readOnlyRootFilesystem: true

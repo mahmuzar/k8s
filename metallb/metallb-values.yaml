@@ -1,0 +1,6 @@
+speaker:
+  securityContext:
+    capabilities:
+      add:
+        - NET_RAW
+        - NET_ADMIN
